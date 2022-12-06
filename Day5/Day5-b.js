@@ -1,9 +1,14 @@
 const fs = require('fs');
 
-const buildStacks = () => { 
-  const inputs = fs.readFileSync('./input.txt', 'utf-8').split('\n');
-  let stacks = [];
+const fileContent = fs.readFileSync('./input.txt', 'utf-8').split('\r\n\r\n');
 
+fileContent[0] = fileContent[0].split('\r\n');
+fileContent[0].pop();
+const inputs = fileContent[0];
+const instructions = fileContent[1].split('\r\n');
+
+const buildStacks = () => {
+  let stacks = [];
   let counter = 0;
 
   const setCrateOnStack = (row) => {
@@ -44,7 +49,6 @@ const getCratesOnTop = () => {
     stacks[to].push(...stacks[from].splice(-move, move));
   }
 
-  const instructions = fs.readFileSync('./instructions.txt', 'utf-8').split('\n');
   instructions.map(instruction => applyInstruction(instruction));
 
   return stacks.reduce((accumulator, stack) => accumulator += stack[stack.length - 1], '');
