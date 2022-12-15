@@ -3,8 +3,7 @@ const fs = require('fs');
 const rows = fs.readFileSync('./input.txt', 'utf-8').split('\r\n');
 const nbRows = rows.length;
 const nbColumns = rows[0].length;
-const letters = Array.from(Array(26)).map((e, i) => i + 97).map(x => String.fromCharCode(x));
-
+let founds = [];
 
 class Position {
   constructor({x, y}) {
@@ -26,7 +25,14 @@ class Position {
       new Position({x: this.x, y: this.y + 1})
     ]
     .filter(position => position.isMovable() && this.canMoves(position))
-    .map(position => {position.history.push(this); return position;})
+    .map(position => {
+      position.history.push(this);
+      if (
+        'a' === rows[position.y][position.x] &&
+        !founds.includes([position.x, position.y])
+      ) founds.push([position.x, position.y]);
+      return position;
+    })
   ;
 }
 
@@ -47,17 +53,20 @@ const findPosition = (letter, replaceBy) => {
 }
 
 const end = new Position(findPosition('E', 'z'));
-const start = new Position(findPosition('S', 'a'));
-start.history = start
+end.history = [end]
 let positions = [end];
 let nbMoves = 0;
 
-while (!positions.some(position => position.compare(start))) {
-  nbMoves++
-  positions = positions.map(position => position.getMoves())
+const target = rows.map(
+  (row, y) => row.split('')
+  .map((e, x) => e == 'a' ? [x, y] : null)
+  .filter(x => !!x)
+).flat()[0].length;
+
+while (founds.length < target - 1) {
+    nbMoves++
+    positions = positions.map(position => position.getMoves())
     .flat()
     .filter((position, index, self) => self.findIndex(s => s.compare(position)) === index)
-  ;
 }
-
 console.log(nbMoves);
